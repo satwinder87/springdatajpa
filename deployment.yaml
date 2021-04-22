@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: spring-data-jpa-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-data-jpa
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: spring-data-jpa
+    spec:
+      containers:
+        - image: spring/spring-data-jpa
+          name: spring-data-jpa-container
+          imagePullPolicy: IfNotPresent
+          resources: {}
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+             httpGet:
+               path: /actuator/health
+               port: 8080
+             initialDelaySeconds: 30
+             timeoutSeconds: 1
+          livenessProbe:
+             httpGet:
+               path: /actuator/health
+               port: 8080
+             initialDelaySeconds: 120
+             timeoutSeconds: 1
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  name: spring-data-jpa-service
+spec:
+  selector:
+    app: spring-data-jpa
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  type: LoadBalancer
+
